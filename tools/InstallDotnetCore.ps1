@@ -1,0 +1,2 @@
+# This script install dotnet core
+& "C:\Program Files\PowerShell\7\pwsh.exe" -c "Invoke-WebRequest 'https://dot.net/v1/dotnet-install.ps1' -OutFile 'dotnet-install.ps1'; ./dotnet-install.ps1 -InstallDir '~/.dotnet' -Version '2.2.207'"
