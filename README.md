@@ -22,6 +22,7 @@ We currently have the following scripts:
 - [InstallVSCode.ps1](./tools/InstallVSCode.ps1) - Install VSCode
 - [InstallChrome.ps1](./tools/InstallChrome.ps1) - Install Chrome
 - [InstallFunctionsTools.ps1](./tools/InstallFunctionsTools.ps1) - Install Azure Functions core tools
+- [InstallPyhton.ps1](./tools/InstallPyhton.ps1) - Install a specific version of Pyhton (default = 3.7.0)
 
 In preview:
 
@@ -39,10 +40,14 @@ In order to run the scripts, you will need:
 Launch `PowerShell 7` and execute the script using a command similar to this:
 
 ```powershell
-.\createQuickpulse-Functions.ps1 -SubscriptionId 00000000-0000-0000-0000-000000000000
+.\createQuickpulse-Functions.ps1 -SubscriptionId 00000000-0000-0000-0000-000000000000 -Owner John -VMPassword "Password"
 ```
 
 Where 00000000-0000-0000-0000-000000000000 is the subscription Id where you want the lab to be deployed.
+
+## Using the environement
+
+Once the environement has been deployed, you will need to connect to the vm that has been deployed The public IP address of this VM is displayed at the end of the script.
 
 ## Help and support
 
