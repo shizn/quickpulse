@@ -23,6 +23,7 @@ We currently have the following scripts:
 - [InstallChrome.ps1](./tools/InstallChrome.ps1) - Install Chrome
 - [InstallFunctionsTools.ps1](./tools/InstallFunctionsTools.ps1) - Install Azure Functions core tools
 - [InstallPyhton.ps1](./tools/InstallPyhton.ps1) - Install a specific version of Pyhton (default = 3.7.0)
+- [InstallAzCLI.ps1](./tools/InstallAzCLI.ps1) - Install the latest version of Az CLI
 
 In preview:
 

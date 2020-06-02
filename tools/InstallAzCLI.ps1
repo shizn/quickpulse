@@ -1,0 +1,2 @@
+# This script installs the given version of the Az CLI version 
+& "C:\Program Files\PowerShell\7\pwsh.exe" -c "Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; rm .\AzureCLI.msi"
