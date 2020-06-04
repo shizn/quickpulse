@@ -71,7 +71,7 @@ while ( ((Get-AzVM -Name $VMName -ResourceGroupName $VMResourceGroup).Identity.P
 
 $ParticipantVM = Get-AzVM -Name $VMName -ResourceGroupName $VMResourceGroup
 # Assign permissions to the UX study resourcegroup
-New-AzRoleAssignment -ObjectId $ParticipantVM.Identity.PrincipalId -RoleDefinitionName "Contributor" -Scope $LabRG.ResourceId
+New-AzRoleAssignment -ObjectId $ParticipantVM.Identity.PrincipalId -RoleDefinitionName "Contributor" -Scope "/subscriptions/$SubscriptionId"
 
 Write-Output "Installing PowerShell"
 # Install PowerShell 7
