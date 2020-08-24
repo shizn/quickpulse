@@ -12,7 +12,11 @@ param (
   [Parameter()]
   [Alias("VMPassword")]
   [String]
-  $VMPasswordClear
+  $VMPasswordClear,
+
+  [Parameter()]
+  [String]
+  $labname
 )
 
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
@@ -25,13 +29,13 @@ $Id = Get-Random -Maximum 999 -Minimum 100
 $VMPassword = ConvertTo-SecureString "$VMPasswordClear" -AsPlainText -Force 
 $VMResourceGroup = "QPRG${Id}"
 $LabResourceGroup = "LABRG${Id}"
-$Location = 'EastUS'
+$Location = 'Westus2'
 $VMName = "QPVM${Id}" 
 $VMUSer = 'azureuser'
 $VMSize = 'Standard_DS2_v2'
 $VMCredential = New-Object System.Management.Automation.PSCredential ( $VMUser, $VMPassword)
 $VMPublicIpName = "QPVMIp${Id}"
-$Tags = @{ owner="${Owner}"; lab="azfunctions${Id}"}
+$Tags = @{ owner="${Owner}"; lab="${labname}${Id}"}
 # $MyIP = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
 
 Write-Output "
@@ -71,7 +75,20 @@ while ( ((Get-AzVM -Name $VMName -ResourceGroupName $VMResourceGroup).Identity.P
 
 $ParticipantVM = Get-AzVM -Name $VMName -ResourceGroupName $VMResourceGroup
 # Assign permissions to the UX study resourcegroup
-New-AzRoleAssignment -ObjectId $ParticipantVM.Identity.PrincipalId -RoleDefinitionName "Contributor" -Scope $LabRG.ResourceId
+# New-AzRoleAssignment -ObjectId $ParticipantVM.Identity.PrincipalId -RoleDefinitionName "Contributor" -Scope $LabRG.ResourceId
+
+
+# Create a user identity for the lab participant 
+$participantName = "labparticipant${Id}"
+New-AzUserAssignedIdentity -ResourceGroupName $VMResourceGroup -Name $participantName
+$participantId = (Get-AzUserAssignedIdentity -ResourceGroupName $VMResourceGroup -Name $participantName).Id
+$participantClientId = (Get-AzUserAssignedIdentity -ResourceGroupName $VMResourceGroup -Name $participantName).ClientId
+$identityNamePrincipalId = (Get-AzUserAssignedIdentity -ResourceGroupName $VMResourceGroup -Name $participantName).PrincipalId
+
+Update-AzVM -ResourceGroupName $VMResourceGroup -VM $ParticipantVM -IdentityType UserAssigned -IdentityId $participantId
+
+# Assign contributor role to the subscription
+New-AzRoleAssignment -ObjectId $identityNamePrincipalId -RoleDefinitionName "Owner" -Scope "/subscriptions/$SubscriptionId"
 
 Write-Output "Installing PowerShell"
 # Install PowerShell 7
@@ -101,9 +118,23 @@ else
 }
 Start-Sleep 10 
 
-# Install Az.Functions module 
+# # Install Az.ImageBuilder module 
+# Write-Output "Installing Functions module"
+# $InvokeCommandResult = Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallModule.ps1' -Parameter @{ModuleName = "Az.ImageBuilder"; ModuleVersion = "0.1.0"}
+# If ($InvokeCommandResult.Status -eq "Succeeded")
+# {
+#   Write-Output "Installation succeded. ${InvokeCommandResult.Value[0].Message}"
+# }
+# else
+# { 
+#   Write-Error "Issue encountered while installing Az: ${InvokeCommandResult.Value[1].Message}"
+#   Break
+# }
+# Start-Sleep 10 
+
+# Install Az.ManagedServiceIdentity module 
 Write-Output "Installing Functions module"
-$InvokeCommandResult = Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallModule.ps1' -Parameter @{ModuleName = "Az.Functions"; ModuleVersion = "1.0.0"}
+$InvokeCommandResult = Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallModule.ps1' -Parameter @{ModuleName = "Az.ManagedServiceIdentity"; ModuleVersion = "0.7.3"}
 If ($InvokeCommandResult.Status -eq "Succeeded")
 {
   Write-Output "Installation succeded. ${InvokeCommandResult.Value[0].Message}"
@@ -157,20 +188,6 @@ else
 }
 Start-Sleep 10
 
-# Install Azure functions core tools
-Write-Output "Installing Function tools"
-$InvokeCommandResult = Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallFunctionsTools.ps1'
-If ($InvokeCommandResult.Status -eq "Succeeded")
-{
-  Write-Output "Installation succeded. ${InvokeCommandResult.Value[0].Message}"
-}
-else
-{ 
-  Write-Error "Issue encountered while installing Az: ${InvokeCommandResult.Value[1].Message}"
-  Break
-}
-Start-Sleep 10
-
 # Install Chrome
 Write-Output "Installing Chrome"
 $InvokeCommandResult = Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallChrome.ps1'
@@ -205,11 +222,14 @@ $JitPolicy = (@{ id="/subscriptions/$SubscriptionId/resourceGroups/$VMResourceGr
 $JitPolicyArr=@($JitPolicy)
 Set-AzJitNetworkAccessPolicy -Kind "Basic" -Location $Location -Name "default" -ResourceGroupName $VMResourceGroup -VirtualMachine $JitPolicyArr
 
+$VMPublicIpAddress =  (Get-AzPublicIpAddress -Name $VMPublicIpName -ResourceGroupName $VMResourceGroup).IpAddress
+
 Write-Output "
 Virtual Machine user:     $VMUser`
 Virtual Machine Password: $VMPasswordClear`
 ResourceGroup:            $VMResourceGroup`
-VM PublicIP:              $PublicIP.IpAddress
+VM PublicIP:              $VMPublicIpAddress`
+Connect to Azure using:   Connect-AzAccount -Identity -AccountId $participantClientId
 "
 
 Write-Output( "Script completed in " + $stopwatch.Elapsed.TotalSeconds + "seconds" )
