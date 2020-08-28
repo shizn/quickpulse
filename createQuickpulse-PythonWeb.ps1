@@ -104,6 +104,32 @@ else
 }
 Start-Sleep 10
 
+# Install Az Module in PowerShell 7
+Write-Output "Installing Az module"
+$InvokeCommandResult = Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallAz.ps1'
+If ($InvokeCommandResult.Status -eq "Succeeded")
+{
+  Write-Output "Installation succeded. ${InvokeCommandResult.Value[0].Message}"
+}
+else
+{ 
+  Write-Error "Issue encountered while installing Az: ${InvokeCommandResult.Value[1].Message}"
+  Break
+}
+Start-Sleep 10 
+# Install Az.ManagedServiceIdentity module 
+Write-Output "Installing ManagedServiceIdentity module"
+$InvokeCommandResult = Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallModule.ps1' -Parameter @{ModuleName = "Az.ManagedServiceIdentity"; ModuleVersion = "0.7.3"}
+If ($InvokeCommandResult.Status -eq "Succeeded")
+{
+  Write-Output "Installation succeded. ${InvokeCommandResult.Value[0].Message}"
+}
+else
+{ 
+  Write-Error "Issue encountered while installing Az: ${InvokeCommandResult.Value[1].Message}"
+  Break
+}
+Start-Sleep 10 
 
 # Install VSCode 
 Write-Output "Installing VSCode"
@@ -131,21 +157,7 @@ else
   Write-Error "Issue encountered while installing Python: ${InvokeCommandResult.Value[1].Message}"
   Break
 }
-Start-Sleep 10
-
-# Install Git for Windows
-Write-Output "Installing Git"
-$InvokeCommandResult = Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallGit.ps1'
-If ($InvokeCommandResult.Status -eq "Succeeded")
-{
-  Write-Output "Installation succeded. ${InvokeCommandResult.Value[0].Message}"
-}
-else
-{ 
-  Write-Error "Issue encountered while installing Git: ${InvokeCommandResult.Value[1].Message}"
-  Break
-}
-Start-Sleep 10
+Start-Sleep 100
 
 # Install Chrome
 Write-Output "Installing Chrome"
@@ -159,11 +171,11 @@ else
   Write-Error "Issue encountered while installing Chrome: ${InvokeCommandResult.Value[1].Message}"
   Break
 }
-Start-Sleep 20
+Start-Sleep 50
 
 # Copy master preferences 
 Write-Output "Configuring Chrome HomePage"
-$InvokeCommandResult = Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/ChromeSettings.ps1' -Parameter @{ChromeHomePage = "https://docs.microsoft.com/en-us/azure/functions/"}
+$InvokeCommandResult = Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/ChromeSettings.ps1' -Parameter @{ChromeHomePage = "https://docs.microsoft.com/en-us/azure/app-service/tutorial-python-postgresql-app?tabs=bash%2Cclone"}
 If ($InvokeCommandResult.Status -eq "Succeeded")
 {
   Write-Output "Installation succeded. ${InvokeCommandResult.Value[0].Message}"
@@ -171,6 +183,21 @@ If ($InvokeCommandResult.Status -eq "Succeeded")
 else
 { 
   Write-Error "Issue encountered while installing Az: ${InvokeCommandResult.Value[1].Message}"
+  Break
+}
+Start-Sleep 100
+
+# Install Git
+Write-Output "Installing Git"
+$InvokeCommandResult = Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallGit.ps1'
+If ($InvokeCommandResult.Status -eq "Succeeded")
+{
+  Write-Output "Installation succeded. ${InvokeCommandResult.Value[0].Message}"
+  Write-Output $InvokeCommandResult
+}
+else
+{ 
+  Write-Error "Issue encountered while installing Git: ${InvokeCommandResult.Value[1].Message}"
   Break
 }
 Start-Sleep 10

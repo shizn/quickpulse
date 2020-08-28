@@ -35,6 +35,9 @@ In order to run the scripts, you will need:
 
 - PowerShell 7: [Install PowerShell](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7)
 - Latest Azure PowerShell module: [Install Azure PowerShell](https://docs.microsoft.com/en-us/powershell/azure/install-az-ps)
+- `Install-Module -Name Az.ManagedServiceIdentity`
+- `Install-Module -Name Az.Security`
+- Azure Security Center needs to be enabled for the subscription to create JIT policy: Navigate to the VM Configuration blade then click on Upgrade your Security Center Subscription to enable a just-in-time access.
 
 ## Execute the script
 
