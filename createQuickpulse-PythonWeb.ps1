@@ -75,7 +75,7 @@ while ( ((Get-AzVM -Name $VMName -ResourceGroupName $VMResourceGroup).Identity.P
 
 $ParticipantVM = Get-AzVM -Name $VMName -ResourceGroupName $VMResourceGroup
 # Assign permissions to the UX study resourcegroup
-# New-AzRoleAssignment -ObjectId $ParticipantVM.Identity.PrincipalId -RoleDefinitionName "Contributor" -Scope $LabRG.ResourceId
+New-AzRoleAssignment -ObjectId $ParticipantVM.Identity.PrincipalId -RoleDefinitionName "Contributor" -Scope $LabRG.ResourceId
 
 
 # Create a user identity for the lab participant 
@@ -114,17 +114,17 @@ Start-Sleep 10
 # Install Python 
 Write-Output "Installing Python"
 Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallPython.ps1'
-Start-Sleep 100
+Start-Sleep 10
 
 # Install Chrome
 Write-Output "Installing Chrome"
 Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallChrome.ps1'
-Start-Sleep 50
+Start-Sleep 10
 
 # Copy master preferences 
 Write-Output "Configuring Chrome HomePage"
 Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/ChromeSettings.ps1' -Parameter @{ChromeHomePage = "https://docs.microsoft.com/en-us/azure/app-service/tutorial-python-postgresql-app?tabs=bash%2Cclone"}
-Start-Sleep 100
+Start-Sleep 10
 
 # Install Git
 Write-Output "Installing Git"
