@@ -38,6 +38,7 @@ In order to run the scripts, you will need:
 - `Install-Module -Name Az.ManagedServiceIdentity`
 - `Install-Module -Name Az.Security`
 - Azure Security Center needs to be enabled for the subscription to create JIT policy: Navigate to the VM Configuration blade then click on Upgrade your Security Center Subscription to enable a just-in-time access.
+- A network security group needs to be attached to the VM for JIT rules.
 
 ## Execute the script
 

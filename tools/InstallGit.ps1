@@ -1,2 +1,1 @@
-# This Script installs Git for Windows
-& "C:\Program Files\PowerShell\7\pwsh.exe" -c "Install-Script -Name Install-Git -Scope AllUsers -Force; Install-Git.ps1"
+& "C:\Program Files\PowerShell\7\pwsh.exe" -c "Invoke-WebRequest -Uri https://github.com/git-for-windows/git/releases/download/v2.28.0.windows.1/Git-2.28.0-64-bit.exe -OutFile .\git.exe; .\git.exe /VERYSILENT /NORESTART"
