@@ -75,7 +75,7 @@ while ( ((Get-AzVM -Name $VMName -ResourceGroupName $VMResourceGroup).Identity.P
 
 $ParticipantVM = Get-AzVM -Name $VMName -ResourceGroupName $VMResourceGroup
 # Assign permissions to the UX study resourcegroup
-# New-AzRoleAssignment -ObjectId $ParticipantVM.Identity.PrincipalId -RoleDefinitionName "Contributor" -Scope $LabRG.ResourceId
+New-AzRoleAssignment -ObjectId $ParticipantVM.Identity.PrincipalId -RoleDefinitionName "Contributor" -Scope $LabRG.ResourceId
 
 
 # Create a user identity for the lab participant 
@@ -88,7 +88,8 @@ $identityNamePrincipalId = (Get-AzUserAssignedIdentity -ResourceGroupName $VMRes
 Update-AzVM -ResourceGroupName $VMResourceGroup -VM $ParticipantVM -IdentityType UserAssigned -IdentityId $participantId
 
 # Assign contributor role to the subscription
-New-AzRoleAssignment -ObjectId $identityNamePrincipalId -RoleDefinitionName "Owner" -Scope "/subscriptions/$SubscriptionId"
+# New-AzRoleAssignment -ObjectId $identityNamePrincipalId -RoleDefinitionName "Owner" -Scope "/subscriptions/$SubscriptionId"
+New-AzRoleAssignment -ObjectId $identityNamePrincipalId -RoleDefinitionName "Contributor" -Scope "/subscriptions/$SubscriptionId"
 
 Write-Output "Installing PowerShell"
 # Install PowerShell 7
@@ -105,6 +106,11 @@ Write-Output "Installing ManagedServiceIdentity module"
 Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallModule.ps1' -Parameter @{ModuleName = "Az.ManagedServiceIdentity"; ModuleVersion = "0.7.3"}
 Start-Sleep 10 
 
+# Install Azure CLI
+Write-Output "Installing Azure CLI"
+Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallAzCLI.ps1'
+Start-Sleep 10
+
 # Install VSCode 
 Write-Output "Installing VSCode"
 Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallVSCode.ps1'
@@ -114,17 +120,17 @@ Start-Sleep 10
 # Install Python 
 Write-Output "Installing Python"
 Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallPython.ps1'
-Start-Sleep 100
+Start-Sleep 10
 
 # Install Chrome
 Write-Output "Installing Chrome"
 Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallChrome.ps1'
-Start-Sleep 50
+Start-Sleep 10
 
 # Copy master preferences 
 Write-Output "Configuring Chrome HomePage"
 Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/ChromeSettings.ps1' -Parameter @{ChromeHomePage = "https://docs.microsoft.com/en-us/azure/app-service/tutorial-python-postgresql-app?tabs=bash%2Cclone"}
-Start-Sleep 100
+Start-Sleep 10
 
 # Install Git
 Write-Output "Installing Git"
