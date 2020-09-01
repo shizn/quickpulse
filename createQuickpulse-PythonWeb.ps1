@@ -137,6 +137,11 @@ Write-Output "Installing Git"
 Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallGit.ps1'
 Start-Sleep 10
 
+# Install private az extensions
+Write-Output "Installing Extension"
+Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallAzCLIExtension.ps1'
+Start-Sleep 10
+
 # Assign JIT Policy to VM
 $JitPolicy = (@{ id="/subscriptions/$SubscriptionId/resourceGroups/$VMResourceGroup/providers/Microsoft.Compute/virtualMachines/$VMName" 
                  ports=(@{ number=22; protocol="*"; allowedSourceAddressPrefix=@("*"); maxRequestAccessDuration="PT3H"}, @{ number=3389; protocol="*"; allowedSourceAddressPrefix=@("*"); maxRequestAccessDuration="PT3H"})})
