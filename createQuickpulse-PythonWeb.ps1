@@ -88,7 +88,8 @@ $identityNamePrincipalId = (Get-AzUserAssignedIdentity -ResourceGroupName $VMRes
 Update-AzVM -ResourceGroupName $VMResourceGroup -VM $ParticipantVM -IdentityType UserAssigned -IdentityId $participantId
 
 # Assign contributor role to the subscription
-New-AzRoleAssignment -ObjectId $identityNamePrincipalId -RoleDefinitionName "Owner" -Scope "/subscriptions/$SubscriptionId"
+# New-AzRoleAssignment -ObjectId $identityNamePrincipalId -RoleDefinitionName "Owner" -Scope "/subscriptions/$SubscriptionId"
+New-AzRoleAssignment -ObjectId $identityNamePrincipalId -RoleDefinitionName "Contributor" -Scope "/subscriptions/$SubscriptionId"
 
 Write-Output "Installing PowerShell"
 # Install PowerShell 7
@@ -104,6 +105,11 @@ Start-Sleep 10
 Write-Output "Installing ManagedServiceIdentity module"
 Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallModule.ps1' -Parameter @{ModuleName = "Az.ManagedServiceIdentity"; ModuleVersion = "0.7.3"}
 Start-Sleep 10 
+
+# Install Azure CLI
+Write-Output "Installing Azure CLI"
+Invoke-AzVMRunCommand -ResourceGroupName $VMResourceGroup -VMName $ParticipantVM.Name -CommandId 'RunPowerShellScript' -ScriptPath './tools/InstallAzCLI.ps1'
+Start-Sleep 10
 
 # Install VSCode 
 Write-Output "Installing VSCode"
