@@ -27,14 +27,14 @@ $Id = Get-Random -Maximum 999 -Minimum 100
 #$Characters = 'abcdefghkmnprstuvwxyz23456789$%&?*+#'
 #$VMPasswordClear = (-join ($Characters.ToCharArray() | Get-Random -Count 12)).ToString()
 $VMPassword = ConvertTo-SecureString "$VMPasswordClear" -AsPlainText -Force 
-$VMResourceGroup = "QPRG${Id}"
-$LabResourceGroup = "LABRG${Id}"
+$VMResourceGroup = "PYQPRG${Id}"
+$LabResourceGroup = "PYLABRG${Id}"
 $Location = 'Westus2'
-$VMName = "QPVM${Id}" 
+$VMName = "PYQPVM${Id}" 
 $VMUSer = 'azureuser'
 $VMSize = 'Standard_DS2_v2'
 $VMCredential = New-Object System.Management.Automation.PSCredential ( $VMUser, $VMPassword)
-$VMPublicIpName = "QPVMIp${Id}"
+$VMPublicIpName = "PYQPVMIp${Id}"
 $Tags = @{ owner="${Owner}"; lab="${labname}${Id}"}
 # $MyIP = (Invoke-WebRequest -uri "http://ifconfig.me/ip").Content
 
